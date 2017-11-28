@@ -1,6 +1,5 @@
-
 class Fakecode {
-	int a;
+    int a;
 	int b;
 	int c;
 

@@ -1,9 +1,13 @@
 import java.io.*;
 
+
 public class Input {
 
 InputStream inputstream;	
 Reader reader;
+public int line = 1;
+
+
 public Input(String filename) {
 
 try {
@@ -27,6 +31,9 @@ public char next() {
 	} catch (IOException e) {
 		c = (char) -1;
 	}
+    if (c == '\n'){
+	    line++;
+    }
 	return c;
 }
 

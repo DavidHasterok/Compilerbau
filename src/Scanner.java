@@ -1,6 +1,6 @@
 
 public class Scanner {
-private Input in;
+public Input in;
 private char c;
 public boolean EOT = false;
 
@@ -33,7 +33,8 @@ Scanner(Input in) {
 }
 
 public void getSym() {
-	while(c <= ' ') {
+
+    while(c <= ' ') {
 		c = in.next();
 	}
     id = "";

@@ -7,8 +7,8 @@ public class Parser {
         this.s.getSym();
     }
 
-    static void error(String s){
-        System.out.println(s);
+    void error(String message){
+        System.out.println(s.in.line + ": " + message);
     }
 
     void klasse() {    // class = "class" ident classbody.
