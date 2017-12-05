@@ -119,7 +119,7 @@ public void getSym() {
 			  id = "(";
 			  c = in.next(); break;
 	case ')': sym = rparen;
-			  id = "(";
+			  id = ")";
 			  c = in.next(); break;
 	case '{': sym = lcparen;
 			  id = "{";
@@ -208,9 +208,8 @@ public void getSym() {
 	if (sym == comment){
 	    getSym();
     }
-	
+	//System.out.println(sym + ", " + id + ", " + num);
 }
-
 
 
 }
