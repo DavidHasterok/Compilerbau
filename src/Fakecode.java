@@ -1,15 +1,21 @@
 class Fakecode {
-    int a;
+    final int a = 5;
 	int b;
 	int c;
 
 
 	public void main(int x) {
 
-		a = x;
+		b = x;
+
+		if (a < b){
+			b = c;
+		} else {
+		    b = a;
+        }
 	}
 	public void f() {
-		a = a + 1;
+		c = a + 1;
 		main(5);
 	}
 }

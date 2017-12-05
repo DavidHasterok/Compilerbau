@@ -1,10 +1,15 @@
 public class Parser {
 
     Scanner s;
-
+    Symboltabelle symtable;
+    Symboltabelle currentTable;
+    Objekt currentObj;
     Parser(Scanner s){
         this.s = s;
         this.s.getSym();
+        this.symtable = new Symboltabelle();
+        this.symtable.level = "Programm";
+        this.currentTable = symtable;
     }
 
     void error(String message){
@@ -15,8 +20,14 @@ public class Parser {
         //System.out.println("Klasse");
         if (s.sym == s.CLASS){ //"class"
             s.getSym();
+            Symboltabelle klassentabelle = new Symboltabelle((this.symtable));
+            klassentabelle.level = "Klassenvariablen & -methoden von " + s.id;
+            Objekt klasse = new Objekt(s.id, Objekt.CLASS, klassentabelle);
+            this.symtable.insert(klasse);
+            currentTable = klassentabelle;
             ident();    //ident
             classBody(); //classbody
+            printTables();
         } else {
             error("'class' erwartet, " + s.id + " gefunden");
         }
@@ -53,11 +64,16 @@ public class Parser {
         //System.out.println("declarations");
         while (s.sym == s.FINAL){ // final
             s.getSym();
+            Type type = new Type(s.sym);
             type();              //type
+            String name = s.id;
             ident();             //ident
             if (s.sym == s.equals){ // =
                 s.getSym();
+                long val = Long.valueOf(s.num);
                 expression();     //expression
+                Objekt Konstante = new Objekt(name, Objekt.CONST, type, val);
+                currentTable.insert(Konstante);
             }else {
                 error("declarations: = erwartet, " + s.id + " gefunden");
             }
@@ -70,7 +86,11 @@ public class Parser {
 
         while (s.sym == s.INT){  //{ type
             s.getSym();
+            String name = s.id;
+            Type type = new Type(Type.INT);
             ident();   //ident
+            Objekt Variable = new Objekt(name, Objekt.VAR, type);
+            currentTable.insert(Variable);
             if (s.sym == s.semicolon){  //;
                 s.getSym();
             } else {
@@ -183,9 +203,22 @@ public class Parser {
         //System.out.println("methodhead");
         if (s.sym == s.PUBLIC){ //public
             s.getSym();
+            Type type = new Type(s.sym);
             methodType();
+            String name = s.id;
             ident();
             formalParameters();
+            Objekt parameterlist;
+            if (currentObj != null){
+                parameterlist = currentObj;
+            } else {
+                parameterlist = new Objekt();
+            }
+            Symboltabelle methodBody = new Symboltabelle(currentTable);
+            methodBody.level = "Methodenvariablen von " + name;
+            Objekt methode = new Objekt(name, Objekt.PRO, type, parameterlist, methodBody);
+            currentTable.insert(methode);
+            currentTable = methodBody;
         } else {
             error("methodHead: 'public' erwartet, " + s.id + " gefunden");
         }
@@ -209,10 +242,15 @@ public class Parser {
             s.getSym();
             if (s.sym == s.INT){  // [ fpSection starts with int
                 fpSection();     //fp_section
+                Objekt firstObj = currentObj;
+                Objekt tmpObj = currentObj;
                 while (s.sym == s.comma){  // { ,
                     s.getSym();
                     fpSection();   //fpsection
+                    tmpObj.next = currentObj;
+                    tmpObj = currentObj;
                 }  // }
+                currentObj = firstObj;
             }  // ]
             if (s.sym == s.rparen){  // )
                 s.getSym();
@@ -227,8 +265,11 @@ public class Parser {
 
     void fpSection(){ //type ident
         //System.out.println("fpSection");
+        Type type = new Type(s.sym);
         type();
+        String name = s.id;
         ident();
+        currentObj = new Objekt(name, Objekt.VAR, type);
         //System.out.println("fpSection Finished");
     }
 
@@ -242,6 +283,7 @@ public class Parser {
             statementSequence(); //statementSequence
             if (s.sym == s.rcparen){
                 s.getSym();
+                currentTable = currentTable.enclose;
             } else {
                 error("methodBody: } erwartet, " + s.id + " gefunden");
             }
@@ -422,5 +464,13 @@ public class Parser {
         //System.out.println("returnStatement Finished");
     }
 
+    public void printTables(){
+        Symboltabelle tmp = this.symtable;
+
+        while (tmp != null) {
+            tmp.printTable();
+            tmp = tmp.enclose;
+        }
+    }
 
 }
